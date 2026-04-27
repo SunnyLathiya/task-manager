@@ -9,6 +9,9 @@
     "test": "jest",
     "lint": "next lint",
     "format": "prettier --write .",
+    "deploy": "serverless deploy",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove": "serverless remove",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -27,6 +30,7 @@
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "serverless-http": "^3.2.0",
     "uuid": "^9.0.1",
     "zod": "^4.3.6"
   },
@@ -38,8 +42,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^11.0.0",
+    "esbuild": "^0.28.0",
     "husky": "^9.1.7",
     "jest": "^30.3.0",
+    "serverless": "^3.40.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-esbuild": "^1.57.1",
+    "serverless-next.js": "^1.14.0",
+    "serverless-offline": "^14.5.0",
     "ts-jest": "^29.4.9",
     "typescript": "^5"
   }

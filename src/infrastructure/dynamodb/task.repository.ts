@@ -28,28 +28,32 @@ export class DynamoDBTaskRepository implements ITaskRepository {
   }
 
   async findByUserId(userId: string, filter?: ListTasksFilter): Promise<{ items: TaskEntity[]; nextKey?: string }> {
-    const filterExpression = filter?.status ? '#status = :status' : undefined;
-
+    if (!userId) {
+      return { items: [] };
+    }
     const exclusiveStartKey = filter?.cursor
       ? JSON.parse(Buffer.from(filter.cursor, 'base64').toString('utf8'))
       : undefined;
 
-    const result = await dynamoDb.send(
-      new QueryCommand({
-        TableName: TABLE_NAMES.TASKS,
-        IndexName: TASKS_USER_GSI,
-        KeyConditionExpression: 'userId = :userId',
-        FilterExpression: filterExpression,
-        ExpressionAttributeValues: {
-          ':userId': userId,
-          ...(filter?.status && { ':status': filter.status }),
-        },
-        ...(filter?.status && { ExpressionAttributeNames: { '#status': 'status' } }),
-        Limit: filter?.limit ?? 20,
-        ExclusiveStartKey: exclusiveStartKey,
-        ScanIndexForward: false, // Newest tasks first
-      }),
-    );
+    const queryInput: any = {
+      TableName: TABLE_NAMES.TASKS,
+      IndexName: TASKS_USER_GSI,
+      KeyConditionExpression: 'userId = :userId',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+      },
+      Limit: filter?.limit ?? 20,
+      ExclusiveStartKey: exclusiveStartKey,
+      ScanIndexForward: false,
+    };
+
+    if (filter?.status) {
+      queryInput.FilterExpression = '#status = :status';
+      queryInput.ExpressionAttributeValues[':status'] = filter.status;
+      queryInput.ExpressionAttributeNames = { '#status': 'status' };
+    }
+
+    const result = await dynamoDb.send(new QueryCommand(queryInput));
 
     const nextKey = result.LastEvaluatedKey
       ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64')

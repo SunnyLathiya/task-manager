@@ -4,8 +4,8 @@
  */
 
 export const TABLE_NAMES = {
-  USERS: process.env.DYNAMODB_USERS_TABLE ?? 'task-manager-users-dev',
-  TASKS: process.env.DYNAMODB_TASKS_TABLE ?? 'task-manager-tasks-dev',
+  USERS: process.env.DYNAMODB_USERS_TABLE ?? 'task-manager-api-users-dev',
+  TASKS: process.env.DYNAMODB_TASKS_TABLE ?? 'task-manager-api-tasks-dev',
 } as const;
 
 export const USERS_EMAIL_GSI = 'email-index';

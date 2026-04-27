@@ -1,0 +1,98 @@
+service: task-manager-api
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    # Unique names to avoid conflict with other stacks
+    DYNAMODB_USERS_TABLE: ${self:service}-users-${self:provider.stage}
+    DYNAMODB_TASKS_TABLE: ${self:service}-tasks-${self:provider.stage}
+    JWT_SECRET: ${env:JWT_SECRET}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - Fn::GetAtt: [UsersTable, Arn]
+        - Fn::Join: [ "/", [ Fn::GetAtt: [UsersTable, Arn], "index/*" ] ]
+        - Fn::GetAtt: [TasksTable, Arn]
+        - Fn::Join: [ "/", [ Fn::GetAtt: [TasksTable, Arn], "index/*" ] ]
+
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - httpApi: '*'
+
+custom:
+  dotenv:
+    exclude:
+      - AWS_REGION
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+  esbuild:
+    bundle: true
+    minify: true
+    target: 'node20'
+    platform: 'node'
+    exclude: ['@aws-sdk/*']
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_USERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+    TasksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TASKS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: taskId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: taskId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+plugins:
+  - serverless-esbuild
+  - serverless-dotenv-plugin
+  - serverless-offline

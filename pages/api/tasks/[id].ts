@@ -26,9 +26,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   // GET /api/tasks/[id] — Get single task
   if (req.method === 'GET') {
     const result = await getTaskUseCase.execute(taskId, userId);
-    
+
     if (result.ok) return res.status(200).json(result.value);
-    
+
     const status = result.error.code === 'TASK_NOT_FOUND' ? 404 : 403;
     return res.status(status).json({ error: result.error.code, message: result.error.message });
   }
@@ -39,9 +39,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     if (!data) return;
 
     const result = await updateTaskUseCase.execute(taskId, userId, data);
-    
+
     if (result.ok) return res.status(200).json(result.value);
-    
+
     const status = result.error.code === 'TASK_NOT_FOUND' ? 404 : 403;
     return res.status(status).json({ error: result.error.code, message: result.error.message });
   }
@@ -49,14 +49,18 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   // DELETE /api/tasks/[id] — Delete task
   if (req.method === 'DELETE') {
     const result = await deleteTaskUseCase.execute(taskId, userId);
-    
-    if (result.ok) return res.status(204).end();
-    
+
+    if (result.ok) {
+      res.status(204).end();
+      return;
+    }
+
     const status = result.error.code === 'TASK_NOT_FOUND' ? 404 : 403;
-    return res.status(status).json({ error: result.error.code, message: result.error.message });
+    res.status(status).json({ error: result.error.code, message: result.error.message });
+    return;
   }
 
-  return res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });
+  res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });
 }
 
 export default withErrorHandler(withAuth(handler));

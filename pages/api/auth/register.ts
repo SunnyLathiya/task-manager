@@ -20,7 +20,8 @@ const registerUseCase = new RegisterUserUseCase(userRepository);
  */
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });
+    res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });
+    return;
   }
 
   // 3. Validate input
@@ -32,11 +33,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // 5. Handle result
   if (result.ok) {
-    return res.status(201).json(result.value);
+    res.status(201).json(result.value);
   } else {
-    return res.status(400).json({ 
-      error: result.error.code, 
-      message: result.error.message 
+    res.status(400).json({
+      error: result.error.code,
+      message: result.error.message,
     });
   }
 }
