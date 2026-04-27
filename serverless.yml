@@ -6,6 +6,8 @@ provider:
   runtime: nodejs20.x
   region: us-east-1
   stage: ${opt:stage, 'dev'}
+  httpApi:
+    cors: true
   environment:
     NODE_ENV: ${self:provider.stage}
     # Unique names to avoid conflict with other stacks

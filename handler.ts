@@ -35,29 +35,44 @@ export const handler = async (event: any) => {
     return decoded.userId;
   };
 
+  const response = (statusCode: number, body: any) => ({
+    statusCode,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Methods': '*',
+    },
+    body: JSON.stringify(body),
+  });
+  
+  // Handle Preflight OPTIONS requests
+  if (method === 'OPTIONS') {
+    return response(204, '');
+  }
+
   try {
     // PUBLIC ROUTES
     if (path === '/api/auth/register' && method === 'POST') {
       const result = await registerUseCase.execute(body);
-      return result.ok ? { statusCode: 201, body: JSON.stringify(result.value) } : { statusCode: 400, body: JSON.stringify({ error: result.error.code }) };
+      return result.ok ? response(201, result.value) : response(400, { error: result.error.code });
     }
     if (path === '/api/auth/login' && method === 'POST') {
       const result = await loginUseCase.execute(body);
-      return result.ok ? { statusCode: 200, body: JSON.stringify(result.value) } : { statusCode: 401, body: JSON.stringify({ error: result.error.code }) };
+      return result.ok ? response(200, result.value) : response(401, { error: result.error.code });
     }
 
     // PROTECTED ROUTES
     const userId = getUserId();
-    if (!userId) return { statusCode: 401, body: JSON.stringify({ error: 'UNAUTHORIZED' }) };
+    if (!userId) return response(401, { error: 'UNAUTHORIZED' });
 
     // Task CRUD
     if (path === '/api/tasks' && method === 'POST') {
       const result = await createTaskUseCase.execute({ ...body, userId });
-      return result.ok ? { statusCode: 201, body: JSON.stringify(result.value) } : { statusCode: 400, body: JSON.stringify({ error: result.error.code }) };
+      return result.ok ? response(201, result.value) : response(400, { error: result.error.code });
     }
     if (path === '/api/tasks' && method === 'GET') {
       const result = await listTasksUseCase.execute({ userId });
-      return result.ok ? { statusCode: 200, body: JSON.stringify(result.value) } : { statusCode: 400, body: JSON.stringify({ error: result.error.code }) };
+      return result.ok ? response(200, result.value) : response(400, { error: result.error.code });
     }
     
     // Dynamic Routes (GET, PUT, DELETE /api/tasks/{id})
@@ -65,21 +80,21 @@ export const handler = async (event: any) => {
     if (path.startsWith('/api/tasks/') && taskId) {
       if (method === 'GET') {
         const result = await getTaskUseCase.execute(taskId, userId);
-        return result.ok ? { statusCode: 200, body: JSON.stringify(result.value) } : { statusCode: 404, body: JSON.stringify({ error: result.error.code }) };
+        return result.ok ? response(200, result.value) : response(404, { error: result.error.code });
       }
       if (method === 'PUT') {
-        const result = await updateTaskUseCase.execute({ ...body, taskId, userId });
-        return result.ok ? { statusCode: 200, body: JSON.stringify(result.value) } : { statusCode: 404, body: JSON.stringify({ error: result.error.code }) };
+        const result = await updateTaskUseCase.execute(taskId, userId, body);
+        return result.ok ? response(200, result.value) : response(404, { error: result.error.code });
       }
       if (method === 'DELETE') {
         const result = await deleteTaskUseCase.execute(taskId, userId);
-        return result.ok ? { statusCode: 204, body: '' } : { statusCode: 404, body: JSON.stringify({ error: result.error.code }) };
+        return result.ok ? response(200, { success: true }) : response(404, { error: result.error.code });
       }
     }
 
-    return { statusCode: 404, body: JSON.stringify({ error: 'NOT_FOUND' }) };
+    return response(404, { error: 'NOT_FOUND' });
   } catch (error) {
     console.error(error);
-    return { statusCode: 500, body: JSON.stringify({ error: 'INTERNAL_SERVER_ERROR' }) };
+    return response(500, { error: 'INTERNAL_SERVER_ERROR' });
   }
 };
