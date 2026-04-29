@@ -3,8 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 export type UserRole = 'user' | 'admin';
 
 /**
- * UserEntity — the core domain object representing a registered user.
- * Plain immutable value object with no framework dependencies.
+ * User Interfaces
  */
 export interface UserEntity {
   readonly userId: string;      // UUID v4
@@ -21,6 +20,16 @@ export interface CreateUserProps {
   role?: UserRole;
 }
 
+export interface UserPublicView {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+/**
+ * User Factory & Mapping Functions
+ */
+
 /** Factory function to create a new UserEntity */
 export function createUser(props: CreateUserProps): UserEntity {
   const now = new Date().toISOString();
@@ -32,12 +41,6 @@ export function createUser(props: CreateUserProps): UserEntity {
     createdAt: now,
     updatedAt: now,
   };
-}
-
-export interface UserPublicView {
-  id: string;
-  email: string;
-  createdAt: string;
 }
 
 /** Maps a UserEntity to a safe public view (removes password hash) */

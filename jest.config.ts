@@ -6,7 +6,10 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
-  testMatch: ['<rootDir>/src/__tests__/**/*.test.ts'],
+  testMatch: [
+    '<rootDir>/src/__tests__/**/*.test.ts',
+    '<rootDir>/tests/**/*.test.ts'
+  ],
   clearMocks: true,
 };
 

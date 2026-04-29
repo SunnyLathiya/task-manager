@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 export type TaskStatus = 'pending' | 'in-progress' | 'completed';
 
 /**
- * TaskEntity — representing a user's task.
+ * Task Interfaces
  */
 export interface TaskEntity {
   readonly userId: string;       // Owner
@@ -22,6 +22,22 @@ export interface CreateTaskProps {
   status?: TaskStatus;
 }
 
+export interface UpdateTaskProps {
+  title?: string;
+  description?: string;
+  status?: TaskStatus;
+}
+
+export interface ListTasksFilter {
+  status?: TaskStatus;
+  limit?: number;
+  cursor?: string;
+}
+
+/**
+ * Task Factory Functions
+ */
+
 /** Factory to build a valid TaskEntity */
 export function createTask(props: CreateTaskProps): TaskEntity {
   const now = new Date().toISOString();
@@ -34,18 +50,6 @@ export function createTask(props: CreateTaskProps): TaskEntity {
     createdAt: now,
     updatedAt: now,
   };
-}
-
-export interface UpdateTaskProps {
-  title?: string;
-  description?: string;
-  status?: TaskStatus;
-}
-
-export interface ListTasksFilter {
-  status?: TaskStatus;
-  limit?: number;
-  cursor?: string;
 }
 
 /** Immutable merge for task updates */

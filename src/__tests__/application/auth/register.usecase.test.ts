@@ -20,7 +20,7 @@ describe('RegisterUserUseCase', () => {
     mockUserRepository.findByEmail.mockResolvedValue(null); // No existing user
     mockUserRepository.save.mockResolvedValue();
 
-    const result = await useCase.execute({ email: 'new@test.com', password: 'password' });
+    const result = await useCase.execute({ email: 'new@test.com', password: 'Password123!' });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -35,7 +35,7 @@ describe('RegisterUserUseCase', () => {
       userId: '1', email: 'existing@test.com', passwordHash: '...', role: 'user', createdAt: '', updatedAt: ''
     });
 
-    const result = await useCase.execute({ email: 'existing@test.com', password: 'password' });
+    const result = await useCase.execute({ email: 'existing@test.com', password: 'Password123!' });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {

@@ -8,8 +8,10 @@ import { GetTaskUseCase } from './src/application/tasks/get-task.usecase';
 import { UpdateTaskUseCase } from './src/application/tasks/update-task.usecase';
 import { DeleteTaskUseCase } from './src/application/tasks/delete-task.usecase';
 import { verifyToken } from './src/lib/jwt';
+import { AuthenticateUseCase } from './src/application/auth/authenticate.usecase';
 
 const userRepository = new DynamoDBUserRepository();
+const authenticateUseCase = new AuthenticateUseCase();
 const taskRepository = new DynamoDBTaskRepository();
 const registerUseCase = new RegisterUserUseCase(userRepository);
 const loginUseCase = new LoginUserUseCase(userRepository);
@@ -59,6 +61,12 @@ export const handler = async (event: any) => {
     if (path === '/api/auth/login' && method === 'POST') {
       const result = await loginUseCase.execute(body);
       return result.ok ? response(200, result.value) : response(401, { error: result.error.code, message: result.error.message });
+    }
+    if (path === '/api/auth/authenticate' && method === 'POST') {
+      const token = authHeader?.replace('Bearer ', '');
+      if (!token) return response(401, { error: 'MISSING_TOKEN' });
+      const result = await authenticateUseCase.execute(token);
+      return result.ok ? response(200, result.value) : response(401, { error: 'INVALID_TOKEN' });
     }
 
     // PROTECTED ROUTES
