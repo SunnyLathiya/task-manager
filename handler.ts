@@ -54,11 +54,11 @@ export const handler = async (event: any) => {
     // PUBLIC ROUTES
     if (path === '/api/auth/register' && method === 'POST') {
       const result = await registerUseCase.execute(body);
-      return result.ok ? response(201, result.value) : response(400, { error: result.error.code });
+      return result.ok ? response(201, result.value) : response(400, { error: result.error.code, message: result.error.message });
     }
     if (path === '/api/auth/login' && method === 'POST') {
       const result = await loginUseCase.execute(body);
-      return result.ok ? response(200, result.value) : response(401, { error: result.error.code });
+      return result.ok ? response(200, result.value) : response(401, { error: result.error.code, message: result.error.message });
     }
 
     // PROTECTED ROUTES
@@ -68,11 +68,11 @@ export const handler = async (event: any) => {
     // Task CRUD
     if (path === '/api/tasks' && method === 'POST') {
       const result = await createTaskUseCase.execute({ ...body, userId });
-      return result.ok ? response(201, result.value) : response(400, { error: result.error.code });
+      return result.ok ? response(201, result.value) : response(400, { error: result.error.code, message: result.error.message });
     }
     if (path === '/api/tasks' && method === 'GET') {
       const result = await listTasksUseCase.execute({ userId });
-      return result.ok ? response(200, result.value) : response(400, { error: result.error.code });
+      return result.ok ? response(200, result.value) : response(400, { error: result.error.code, message: result.error.message });
     }
     
     // Dynamic Routes (GET, PUT, DELETE /api/tasks/{id})
@@ -80,15 +80,15 @@ export const handler = async (event: any) => {
     if (path.startsWith('/api/tasks/') && taskId) {
       if (method === 'GET') {
         const result = await getTaskUseCase.execute(taskId, userId);
-        return result.ok ? response(200, result.value) : response(404, { error: result.error.code });
+        return result.ok ? response(200, result.value) : response(404, { error: result.error.code, message: result.error.message });
       }
       if (method === 'PUT') {
         const result = await updateTaskUseCase.execute(taskId, userId, body);
-        return result.ok ? response(200, result.value) : response(404, { error: result.error.code });
+        return result.ok ? response(200, result.value) : response(404, { error: result.error.code, message: result.error.message });
       }
       if (method === 'DELETE') {
         const result = await deleteTaskUseCase.execute(taskId, userId);
-        return result.ok ? response(200, { success: true }) : response(404, { error: result.error.code });
+        return result.ok ? response(200, { success: true }) : response(404, { error: result.error.code, message: result.error.message });
       }
     }
 

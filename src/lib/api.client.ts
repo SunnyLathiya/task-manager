@@ -22,7 +22,11 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   }
 
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'Request failed');
+  if (!response.ok) {
+    const error = new Error(data.message || data.error || 'Request failed');
+    (error as any).code = data.error;
+    throw error;
+  }
   return data;
 };
 

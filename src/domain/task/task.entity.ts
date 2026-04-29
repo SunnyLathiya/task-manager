@@ -42,6 +42,12 @@ export interface UpdateTaskProps {
   status?: TaskStatus;
 }
 
+export interface ListTasksFilter {
+  status?: TaskStatus;
+  limit?: number;
+  cursor?: string;
+}
+
 /** Immutable merge for task updates */
 export function applyTaskUpdate(task: TaskEntity, update: UpdateTaskProps): TaskEntity {
   return {

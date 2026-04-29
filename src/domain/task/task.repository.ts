@@ -1,10 +1,4 @@
-import type { TaskEntity, TaskStatus } from './task.entity';
-
-export interface ListTasksFilter {
-  status?: TaskStatus;
-  limit?: number;
-  cursor?: string;
-}
+import type { TaskEntity, TaskStatus, ListTasksFilter } from './task.entity';
 
 /**
  * ITaskRepository — defines Task data operations.

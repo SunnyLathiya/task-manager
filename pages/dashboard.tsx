@@ -74,8 +74,8 @@ export default function Dashboard() {
       }
       setShowModal(false);
       fetchTasks();
-    } catch (err) {
-      addToast('Operation failed', 'error');
+    } catch (err: any) {
+      addToast(err.message || 'Operation failed', 'error');
     }
   };
 
@@ -85,8 +85,8 @@ export default function Dashboard() {
     try {
       await taskApi.update(task.taskId, { status: nextStatus });
       fetchTasks();
-    } catch (err) {
-      addToast('Failed to update status', 'error');
+    } catch (err: any) {
+      addToast(err.message || 'Failed to update status', 'error');
     }
   };
 
@@ -542,6 +542,96 @@ export default function Dashboard() {
           border-radius: 24px;
           border: 1px dashed var(--glass-border);
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+          .dashboard-layout {
+            flex-direction: column;
+          }
+          .sidebar {
+            width: 100%;
+            height: 70px;
+            flex-direction: row;
+            padding: 10px 20px;
+            bottom: 0;
+            top: auto;
+            border-right: none;
+            border-top: 1px solid var(--glass-border);
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(12px);
+          }
+          .sidebar-top {
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 20px;
+            width: auto;
+          }
+          .logo-small {
+            margin-bottom: 0;
+            font-size: 1.8rem;
+          }
+          .sidebar-links {
+            flex-direction: row;
+            width: auto;
+          }
+          .nav-item {
+            padding: 8px 12px;
+            justify-content: center;
+          }
+          .nav-item::after {
+            display: none;
+          }
+          .sidebar-bottom {
+            flex-direction: row;
+            width: auto;
+            padding-top: 0;
+            border-top: none;
+            gap: 12px;
+          }
+          .user-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+          }
+          .logout-btn-premium {
+            padding: 8px;
+            width: auto;
+          }
+          .logout-btn-premium span:first-child {
+            display: none;
+          }
+          .main-content {
+            margin-left: 0;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for bottom nav */
+          }
+          .content-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+          .content-header button {
+            width: 100%;
+          }
+          .welcome h1 {
+            font-size: 1.8rem;
+          }
+          .stats-grid {
+            grid-template-columns: 1fr;
+            margin-bottom: 30px;
+          }
+          .tasks-grid {
+            grid-template-columns: 1fr;
+          }
+          .modal-content {
+            padding: 24px;
+            margin: 16px;
+          }
+        }
+
       `}</style>
     </div>
   );

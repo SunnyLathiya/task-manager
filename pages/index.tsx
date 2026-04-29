@@ -38,12 +38,7 @@ export default function AuthPage() {
         setPassword('');
       }
     } catch (err: any) {
-      const message = err.message === 'INVALID_CREDENTIALS' 
-        ? 'Incorrect email or password. Please try again.'
-        : err.message === 'USER_ALREADY_EXISTS'
-        ? 'An account with this email already exists.'
-        : 'Something went wrong. Please check your connection.';
-      setError(message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -205,6 +200,33 @@ export default function AuthPage() {
           font-size: 0.85rem;
           border: 1px solid rgba(16, 185, 129, 0.2);
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+          .container {
+            padding: 16px;
+            align-items: flex-start;
+            padding-top: 40px;
+          }
+          .logo-text {
+            font-size: 2.5rem;
+          }
+          .brand-subtext {
+            font-size: 1rem;
+            padding: 0 10px;
+          }
+          .auth-card {
+            padding: 24px;
+            border-radius: 20px;
+          }
+          .auth-header h2 {
+            font-size: 1.5rem;
+          }
+          .auth-wrapper {
+            gap: 30px;
+          }
+        }
+
       `}</style>
     </div>
   );

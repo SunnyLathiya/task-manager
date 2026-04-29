@@ -12,7 +12,7 @@ export interface ListTasksDTO {
 export class ListTasksUseCase {
   constructor(private taskRepository: ITaskRepository) {}
 
-  async execute(dto: ListTasksDTO): Promise<Result<{ items: TaskEntity[]; nextKey?: string }, never>> {
+  async execute(dto: ListTasksDTO): Promise<Result<{ items: TaskEntity[]; nextKey?: string }, any>> {
     const result = await this.taskRepository.findByUserId(dto.userId, {
       status: dto.status,
       limit: dto.limit,
