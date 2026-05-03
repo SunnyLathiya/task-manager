@@ -33,13 +33,16 @@ export class LoginUserUseCase {
 
     // 1. Find user by email
     const user = await this.userRepository.findByEmail(dto.email);
-    if (!user) {
-      return err(new InvalidCredentialsError());
-    }
 
-    // 2. Verify password
-    const isPasswordValid = await comparePassword(dto.password, user.passwordHash);
-    if (!isPasswordValid) {
+    // Constant-time dummy hash (bcrypt, cost 12) to mitigate timing attacks
+    // This hash matches the password "dummy"
+    const DUMMY_HASH = '$2b$12$1xZdLukwvju1z/3w9bD6J.VOtfBRWkZKRSJjrtvpwBO1F80l1BRXq';
+    
+    // 2. Verify password (always runs to prevent email enumeration via timing)
+    const hashToCompare = user ? user.passwordHash : DUMMY_HASH;
+    const isPasswordValid = await comparePassword(dto.password, hashToCompare);
+
+    if (!user || !isPasswordValid) {
       return err(new InvalidCredentialsError());
     }
 
