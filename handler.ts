@@ -33,12 +33,22 @@ export const handler = async (event: any) => {
 
   const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
 
+  const getAllowedMethods = (p: string): string => {
+    if (p.startsWith('/api/auth/')) return 'POST, OPTIONS';
+    if (p === '/api/tasks') return 'GET, POST, OPTIONS';
+    if (p.startsWith('/api/tasks/')) return 'GET, PUT, DELETE, OPTIONS';
+    return 'OPTIONS';
+  };
+
   const response = (statusCode: number, body: any) => ({
     statusCode,
     headers: {
       'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': getAllowedMethods(path),
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
     },
     body: JSON.stringify(body),
   });
