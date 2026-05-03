@@ -27,8 +27,14 @@ export class UpdateTaskUseCase {
     }
 
     const updatedTask = applyTaskUpdate(task, props);
-    await this.taskRepository.update(updatedTask);
-    
-    return ok(updatedTask);
+    try {
+      await this.taskRepository.update(updatedTask);
+      return ok(updatedTask);
+    } catch (error: any) {
+      if (error.name === 'ConditionalCheckFailedException') {
+        return err(new TaskNotFoundError(taskId));
+      }
+      throw error;
+    }
   }
 }

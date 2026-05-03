@@ -71,6 +71,7 @@ export class DynamoDBTaskRepository implements ITaskRepository {
       ':title': task.title,
       ':status': task.status,
       ':updatedAt': task.updatedAt,
+      ':userId': task.userId,
     };
     const expressionAttributeNames: Record<string, string> = {
       '#status': 'status',
@@ -88,7 +89,7 @@ export class DynamoDBTaskRepository implements ITaskRepository {
         TableName: TABLE_NAMES.TASKS,
         Key: { taskId: task.taskId },
         UpdateExpression: updateExpression.join(' '),
-        ConditionExpression: 'attribute_exists(taskId)',
+        ConditionExpression: 'attribute_exists(taskId) AND userId = :userId',
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: expressionAttributeValues,
       }),
