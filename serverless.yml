@@ -52,6 +52,12 @@ custom:
     exclude: ['@aws-sdk/*']
 
 resources:
+  extensions:
+    HttpApiStage:
+      Properties:
+        DefaultRouteSettings:
+          ThrottlingBurstLimit: 100
+          ThrottlingRateLimit: 50
   Resources:
     UsersTable:
       Type: AWS::DynamoDB::Table
