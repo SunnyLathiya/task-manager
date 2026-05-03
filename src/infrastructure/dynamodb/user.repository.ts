@@ -1,4 +1,4 @@
-import { GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamoDb } from './client';
 import { TABLE_NAMES, USERS_EMAIL_GSI } from './schema';
 import type { IUserRepository } from '@/src/domain/user/user.repository';
@@ -34,10 +34,26 @@ export class DynamoDBUserRepository implements IUserRepository {
 
   async save(user: UserEntity): Promise<void> {
     await dynamoDb.send(
-      new PutCommand({
-        TableName: TABLE_NAMES.USERS,
-        Item: user,
-        ConditionExpression: 'attribute_not_exists(userId)',
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Put: {
+              TableName: TABLE_NAMES.USERS,
+              Item: user,
+              ConditionExpression: 'attribute_not_exists(userId)',
+            },
+          },
+          {
+            Put: {
+              TableName: TABLE_NAMES.USERS,
+              Item: {
+                userId: `EMAIL#${user.email.toLowerCase().trim()}`,
+                mappedUserId: user.userId,
+              },
+              ConditionExpression: 'attribute_not_exists(userId)',
+            },
+          },
+        ],
       }),
     );
   }

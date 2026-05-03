@@ -38,7 +38,14 @@ export class RegisterUserUseCase {
     });
 
     // 4. Persist to infrastructure
-    await this.userRepository.save(user);
+    try {
+      await this.userRepository.save(user);
+    } catch (error: any) {
+      if (error.name === 'TransactionCanceledException') {
+        return err(new EmailAlreadyExistsError(dto.email));
+      }
+      throw error;
+    }
 
     // 5. Return success result with public view
     return ok(toUserPublicView(user));
