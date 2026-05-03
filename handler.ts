@@ -24,18 +24,8 @@ const deleteTaskUseCase = new DeleteTaskUseCase(taskRepository);
 export const handler = async (event: any) => {
   const path = event.rawPath || event.path;
   const method = event.requestContext.http.method;
-  const body = event.body ? JSON.parse(event.body) : {};
   const headers = event.headers || {};
   const authHeader = headers['authorization'] || headers['Authorization'];
-
-  // Helper for auth
-  const getUserId = () => {
-    if (!authHeader) return null;
-    const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
-    if (!decoded || !decoded.userId) return null;
-    return decoded.userId;
-  };
 
   const response = (statusCode: number, body: any) => ({
     statusCode,
@@ -46,6 +36,24 @@ export const handler = async (event: any) => {
     },
     body: JSON.stringify(body),
   });
+
+  let body: any = {};
+  if (event.body) {
+    try {
+      body = JSON.parse(event.body);
+    } catch {
+      return response(400, { error: 'INVALID_JSON', message: 'Request body is not valid JSON.' });
+    }
+  }
+
+  // Helper for auth
+  const getUserId = () => {
+    if (!authHeader) return null;
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = verifyToken(token);
+    if (!decoded || !decoded.userId) return null;
+    return decoded.userId;
+  };
   
   // Handle Preflight OPTIONS requests
   if (method === 'OPTIONS') {
