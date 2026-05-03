@@ -10,6 +10,10 @@ import { DeleteTaskUseCase } from './src/application/tasks/delete-task.usecase';
 import { verifyToken } from './src/lib/jwt';
 import { AuthenticateUseCase } from './src/application/auth/authenticate.usecase';
 
+if (!process.env.JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set.');
+}
+
 const userRepository = new DynamoDBUserRepository();
 const authenticateUseCase = new AuthenticateUseCase();
 const taskRepository = new DynamoDBTaskRepository();

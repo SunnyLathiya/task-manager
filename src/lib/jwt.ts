@@ -10,9 +10,7 @@ export interface JwtPayload {
  * We use the userId and email to authorize requests later.
  */
 export function signToken(payload: JwtPayload): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET is not defined in environment');
-  
+  const secret = process.env.JWT_SECRET as string;
   return jwt.sign(payload, secret, { expiresIn: '1h' });
 }
 
@@ -22,9 +20,7 @@ export function signToken(payload: JwtPayload): string {
  */
 export function verifyToken(token: string): JwtPayload | null {
   try {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) return null;
-    
+    const secret = process.env.JWT_SECRET as string;
     return jwt.verify(token, secret) as JwtPayload;
   } catch {
     return null;
