@@ -1,4 +1,4 @@
-import { GetCommand, PutCommand, QueryCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, PutCommand, QueryCommand, DeleteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamoDb } from './client';
 import { TABLE_NAMES, TASKS_USER_GSI } from './schema';
 import type { ITaskRepository } from '@/src/domain/task/task.repository';
@@ -66,11 +66,31 @@ export class DynamoDBTaskRepository implements ITaskRepository {
   }
 
   async update(task: TaskEntity): Promise<void> {
+    const updateExpression = ['SET title = :title, #status = :status, updatedAt = :updatedAt'];
+    const expressionAttributeValues: Record<string, any> = {
+      ':title': task.title,
+      ':status': task.status,
+      ':updatedAt': task.updatedAt,
+    };
+    const expressionAttributeNames: Record<string, string> = {
+      '#status': 'status',
+    };
+
+    if (task.description) {
+      updateExpression[0] += ', description = :desc';
+      expressionAttributeValues[':desc'] = task.description;
+    } else {
+      updateExpression.push('REMOVE description');
+    }
+
     await dynamoDb.send(
-      new PutCommand({
+      new UpdateCommand({
         TableName: TABLE_NAMES.TASKS,
-        Item: task,
+        Key: { taskId: task.taskId },
+        UpdateExpression: updateExpression.join(' '),
         ConditionExpression: 'attribute_exists(taskId)',
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
       }),
     );
   }
