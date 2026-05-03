@@ -14,6 +14,7 @@ provider:
     DYNAMODB_USERS_TABLE: ${self:service}-users-${self:provider.stage}
     DYNAMODB_TASKS_TABLE: ${self:service}-tasks-${self:provider.stage}
     JWT_SECRET: ${env:JWT_SECRET}
+    ALLOWED_ORIGIN: ${env:ALLOWED_ORIGIN, '*'}
 
   iamRoleStatements:
     - Effect: Allow

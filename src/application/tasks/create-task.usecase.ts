@@ -15,13 +15,18 @@ export class CreateTaskUseCase {
   constructor(private taskRepository: ITaskRepository) {}
 
   async execute(dto: CreateTaskDTO): Promise<Result<TaskEntity, ValidationError>> {
-    // Joi Validation
-    const { error } = taskSchemas.create.validate({ title: dto.title, description: dto.description });
+    // 1. Validate only the user-provided payload against the schema
+    const { error, value } = taskSchemas.create.validate({ title: dto.title, description: dto.description });
     if (error) {
       return err(new ValidationError(error.details[0].message));
     }
 
-    const task = createTask(dto);
+    // 2. Explicitly map fields to prevent any runtime properties (like status) from persisting
+    const task = createTask({
+      userId: dto.userId,
+      title: value.title,
+      description: value.description,
+    });
     await this.taskRepository.save(task);
     return ok(task);
   }

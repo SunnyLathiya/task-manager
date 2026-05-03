@@ -31,12 +31,14 @@ export const handler = async (event: any) => {
   const headers = event.headers || {};
   const authHeader = headers['authorization'] || headers['Authorization'];
 
+  const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+
   const response = (statusCode: number, body: any) => ({
     statusCode,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': '*',
-      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     },
     body: JSON.stringify(body),
   });
