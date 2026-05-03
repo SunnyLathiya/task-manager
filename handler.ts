@@ -93,7 +93,16 @@ export const handler = async (event: any) => {
       return result.ok ? response(201, result.value) : response(400, { error: result.error.code, message: result.error.message });
     }
     if (path === '/api/tasks' && method === 'GET') {
-      const result = await listTasksUseCase.execute({ userId });
+      const query = event.queryStringParameters || {};
+      const limitParam = query.limit ? parseInt(query.limit, 10) : undefined;
+      const limit = limitParam && !isNaN(limitParam) ? limitParam : undefined;
+
+      const result = await listTasksUseCase.execute({ 
+        userId, 
+        limit, 
+        cursor: query.cursor, 
+        status: query.status 
+      });
       return result.ok ? response(200, result.value) : response(400, { error: result.error.code, message: result.error.message });
     }
     

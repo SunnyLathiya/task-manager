@@ -31,9 +31,19 @@ export class DynamoDBTaskRepository implements ITaskRepository {
     if (!userId) {
       return { items: [] };
     }
-    const exclusiveStartKey = filter?.cursor
-      ? JSON.parse(Buffer.from(filter.cursor, 'base64').toString('utf8'))
-      : undefined;
+    let exclusiveStartKey;
+    if (filter?.cursor) {
+      try {
+        const decoded = Buffer.from(filter.cursor, 'base64').toString('utf8');
+        const parsed = JSON.parse(decoded);
+        // Shape validation: must be an object with taskId and userId
+        if (parsed && typeof parsed === 'object' && 'taskId' in parsed && 'userId' in parsed) {
+          exclusiveStartKey = parsed;
+        }
+      } catch {
+        // Silently ignore invalid cursor to prevent 500 crashes
+      }
+    }
 
     const queryInput: any = {
       TableName: TABLE_NAMES.TASKS,
@@ -42,7 +52,8 @@ export class DynamoDBTaskRepository implements ITaskRepository {
       ExpressionAttributeValues: {
         ':userId': userId,
       },
-      Limit: filter?.limit ?? 20,
+      // Cap the limit to a maximum of 100 to prevent DB overload
+      Limit: Math.min(filter?.limit ?? 20, 100),
       ExclusiveStartKey: exclusiveStartKey,
       ScanIndexForward: false,
     };
