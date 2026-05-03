@@ -11,7 +11,7 @@ export interface JwtPayload {
  */
 export function signToken(payload: JwtPayload): string {
   const secret = process.env.JWT_SECRET as string;
-  return jwt.sign(payload, secret, { expiresIn: '1h' });
+  return jwt.sign(payload, secret, { expiresIn: '1h', algorithm: 'HS256' });
 }
 
 /**
@@ -21,7 +21,19 @@ export function signToken(payload: JwtPayload): string {
 export function verifyToken(token: string): JwtPayload | null {
   try {
     const secret = process.env.JWT_SECRET as string;
-    return jwt.verify(token, secret) as JwtPayload;
+    const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] });
+
+    // Runtime payload shape validation
+    if (
+      typeof decoded !== 'object' ||
+      decoded === null ||
+      typeof (decoded as any).userId !== 'string' ||
+      typeof (decoded as any).email !== 'string'
+    ) {
+      return null;
+    }
+
+    return decoded as JwtPayload;
   } catch {
     return null;
   }
