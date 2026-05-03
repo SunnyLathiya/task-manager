@@ -98,8 +98,12 @@ export const handler = async (event: any) => {
     }
     
     // Dynamic Routes (GET, PUT, DELETE /api/tasks/{id})
-    const taskId = path.split('/').pop();
-    if (path.startsWith('/api/tasks/') && taskId) {
+    const parts = path.split('/'); // e.g. ['', 'api', 'tasks', 'uuid']
+    const isTaskById = parts.length === 4 && parts[1] === 'api' && parts[2] === 'tasks';
+    const taskId = isTaskById ? parts[3] : null;
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    if (isTaskById && taskId && UUID_REGEX.test(taskId)) {
       if (method === 'GET') {
         const result = await getTaskUseCase.execute(taskId, userId);
         return result.ok ? response(200, result.value) : response(404, { error: result.error.code, message: result.error.message });
@@ -112,6 +116,8 @@ export const handler = async (event: any) => {
         const result = await deleteTaskUseCase.execute(taskId, userId);
         return result.ok ? response(200, { success: true }) : response(404, { error: result.error.code, message: result.error.message });
       }
+    } else if (path.startsWith('/api/tasks/')) {
+      return response(400, { error: 'INVALID_ID', message: 'Invalid task ID format or path.' });
     }
 
     return response(404, { error: 'NOT_FOUND' });
